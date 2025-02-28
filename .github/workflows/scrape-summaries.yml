@@ -1,6 +1,9 @@
 name: scrape-summaries
 on: issue_comment
 
+env:
+  GOOGLE_API_KEYS: ${{ secrets.GOOGLE_API_KEYS }}
+
 jobs:
   scrape-data:
     runs-on: ubuntu-latest
@@ -23,6 +26,7 @@ jobs:
       - name: Run Scraper script
         run: |
           cd $GITHUB_WORKSPACE/notebook
+          bash scraper.sh
           echo $(( RANDOM - ( RANDOM % RANDOM ) )) > test.txt
 
       # Commit all changed files back to the repository
