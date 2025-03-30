@@ -12,12 +12,13 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
+    df_sampled = popular_df.sample(n=50)
     return render_template('index.html',
-                           book_name=list(popular_df["Book-Title"].values),
-                           author= list(popular_df["Book-Author"].values),
-                           image= list(popular_df['Image-URL-L'].values),
-                           votes= list(popular_df['num_ratings'].values),
-                           rating= list(popular_df['avg_rating'].values)
+                           book_name=list(df_sampled["Book-Title"].values),
+                           author= list(df_sampled["Book-Author"].values),
+                           image= list(df_sampled['Image-URL-L'].values),
+                           votes= list(df_sampled['num_ratings'].values),
+                           rating= list(df_sampled['avg_rating'].values)
                            )
 
 @app.route('/recommend')
