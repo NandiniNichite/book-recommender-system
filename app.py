@@ -1,34 +1,35 @@
-from flask import Flask,render_template,request
+from flask import Flask, render_template, request, abort
 import pickle
 import numpy as np
 from find_books import query_books
 
-popular_df = pickle.load(open('popular.pkl','rb'))
-pt = pickle.load(open('pt.pkl','rb'))
-books = pickle.load(open('books.pkl','rb'))
-similarity_scores = pickle.load(open('similarity_scores.pkl','rb'))
+# Loading necessary data
+popular_df = pickle.load(open('popular.pkl', 'rb'))
+pt = pickle.load(open('pt.pkl', 'rb'))
+books = pickle.load(open('books.pkl', 'rb'))
+similarity_scores = pickle.load(open('similarity_scores.pkl', 'rb'))
+merged_df = pickle.load(open('books_with_summaries.pkl', 'rb'))
 
 app = Flask(__name__)
 
 @app.route('/')
 def index():
+    # Sample 50 random books
     df_sampled = popular_df.sample(n=50)
-    df_sampled['num_ratings']
     df_sampled["avg_rating"] = df_sampled["avg_rating"].round(2)
 
     return render_template('index.html',
                            book_name=list(df_sampled["Book-Title"].values),
-                           author= list(df_sampled["Book-Author"].values),
-                           image= list(df_sampled['Image-URL-L'].values),
-                           votes= list(df_sampled['num_ratings'].values),
-                           rating= list(df_sampled['avg_rating'].values)
-                           )
+                           author=list(df_sampled["Book-Author"].values),
+                           image=list(df_sampled['Image-URL-L'].values),
+                           votes=list(df_sampled['num_ratings'].values),
+                           rating=list(df_sampled['avg_rating'].values))
 
 @app.route('/recommend')
 def recommend_ui():
     return render_template('recommend.html')
 
-@app.route('/recommend_books',methods=['post'])
+@app.route('/recommend_books', methods=['post'])
 def recommend():
     user_input = request.form.get('user_input')
     index = np.where(pt.index == user_input)[0][0]
@@ -41,7 +42,8 @@ def recommend():
         item.extend(list(temp_df.drop_duplicates('Book-Title')['Book-Title'].values))
         item.extend(list(temp_df.drop_duplicates('Book-Title')['Book-Author'].values))
         item.extend(list(temp_df.drop_duplicates('Book-Title')['Image-URL-L'].values))
-
+        item.extend(list(temp_df.drop_duplicates('Book-Title')['ISBN'].values))  # Make sure to add ISBN
+        
         data.append(item)
 
     return render_template('recommend.html', data=data)
@@ -53,21 +55,43 @@ def query_ui():
 @app.route('/query_books', methods=['POST'])
 def query():
     user_input = request.form.get('query')
-    books_df = query_books(user_input, 100)
+    
+    # Check if user_input exists (i.e., form has been submitted)
+    if user_input:
+        books_df = query_books(user_input, 100)
+        queries_result_df = books_df.sample(50)
 
-    queries_result_df = books_df.sample(50)
+        data = []
+        for _, book in queries_result_df.iterrows():
+            item = [
+                book["Book-Title"],
+                book["Book-Author"],
+                book["Image-URL-L"],
+                book["ISBN_x"], 
+                book['avg_rating'],
+                book['num_ratings'],
+            ]
+            data.append(item)
 
-    data = []
-    for _, book in queries_result_df.iterrows():
-        item = [
-            book["Book-Title"],
-            book["Book-Author"],
-            book["Image-URL-L"],
-            book["Summary"]
-        ]
-        data.append(item)
+        return render_template('query.html', data=data, query=user_input)
+    else:
+        # No query, pass an empty list
+        return render_template('query.html', data=[], query=user_input)
 
-    return render_template('query.html', data=data, query=user_input)
+@app.route('/book/<isbn>')
+def book_detail(isbn):
+    # Find the book with the given ISBN
+    book = merged_df[merged_df['ISBN'] == isbn]
+    
+    if book.empty:
+        abort(404)  # Return 404 error if book is not found
+    
+    # Extract the first (and only) book's details
+    book = book.iloc[0]
+    
+    
+    return render_template('book_detail.html', book=book)
+
 
 if __name__ == '__main__':
-    app.run(threaded=False, processes=1)
+    app.run(debug=True)

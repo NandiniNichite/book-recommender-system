@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ book['Book-Title'] }} - Book Details{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <!-- Book Title and Author -->
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <h1>{{ book['Book-Title'] }}</h1>
+            <h3 class="text-muted">by {{ book['Book-Author'] }}</h3>
+        </div>
+    </div>
+    
+    <!-- Book Info -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <!-- Adjust Image Size without Pixelation -->
+            <img src="{{ book['Image-URL'] }}" alt="{{ book['Book-Title'] }}" class="img-fluid rounded" style="width: 100%; height: auto; object-fit: contain;">
+        </div>
+        
+        <div class="col-md-8">
+            <!-- Book Details -->
+            <h4><strong>Year of Publication:</strong> {{ book['Year-Of-Publication'] }}</h4>
+            <p><strong>ISBN:</strong> {{ book['ISBN'] }}</p>
+            
+            <h5 class="mt-4"><strong>Summary:</strong></h5>
+            <p>{{ book['Summary'] if book['Summary'] else 'No summary available.' }}</p>
+        </div>
+    </div>
+
+    <!-- Back to Home Button -->
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <a href="/" class="btn btn-primary btn-lg">Back to Home</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
