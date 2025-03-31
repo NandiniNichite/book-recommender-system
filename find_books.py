@@ -18,7 +18,7 @@ def get_detailed_instruct(query: str) -> str:
     return f'Instruct: {task}\nQuery: {query}'
 
 # Load embeddings & indices from Pickle
-embeddings = torch.load(EMBEDDINGS_FILE, map_location=torch.device("cpu"))
+embeddings = torch.load(EMBEDDINGS_FILE, map_location=torch.device("cuda"))
 
 with open(INDEX_FILE, "rb") as f:
     valid_indices = pickle.load(f)  # Row indices of stored embeddings

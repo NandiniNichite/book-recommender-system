@@ -12,6 +12,28 @@ merged_df = pickle.load(open('books_with_summaries.pkl', 'rb'))
 
 app = Flask(__name__)
 
+def filter_similar_books(book_name: str, count: int) -> list:
+    try: 
+        index = np.where(pt.index == book_name)[0][0]
+        similar_items = sorted(list(enumerate(similarity_scores[index])), key=lambda x: x[1], reverse=True)[1:count]
+    except: 
+        return [] # Failed to find book, return empty list
+    data = []
+    for i in similar_items:
+        item = []
+        temp_df = books[books['Book-Title'] == pt.index[i[0]]]
+        item.extend(list(temp_df.drop_duplicates('Book-Title')['Book-Title'].values))
+        item.extend(list(temp_df.drop_duplicates('Book-Title')['Book-Author'].values))
+        item.extend(list(temp_df.drop_duplicates('Book-Title')['Image-URL-L'].values))
+        item.extend(list(temp_df.drop_duplicates('Book-Title')['ISBN'].values))  # Make sure to add ISBN
+        
+        data.append(item)
+    return data
+
+@app.context_processor
+def functions_injector():
+    return dict(round=round)
+
 @app.route('/')
 def index():
     # Sample 50 random books
@@ -23,7 +45,8 @@ def index():
                            author=list(df_sampled["Book-Author"].values),
                            image=list(df_sampled['Image-URL-L'].values),
                            votes=list(df_sampled['num_ratings'].values),
-                           rating=list(df_sampled['avg_rating'].values))
+                           rating=list(df_sampled['avg_rating'].values),
+                           isbn=list(df_sampled['ISBN'].values))
 
 @app.route('/recommend')
 def recommend_ui():
@@ -32,19 +55,7 @@ def recommend_ui():
 @app.route('/recommend_books', methods=['post'])
 def recommend():
     user_input = request.form.get('user_input')
-    index = np.where(pt.index == user_input)[0][0]
-    similar_items = sorted(list(enumerate(similarity_scores[index])), key=lambda x: x[1], reverse=True)[1:10]
-
-    data = []
-    for i in similar_items:
-        item = []
-        temp_df = books[books['Book-Title'] == pt.index[i[0]]]
-        item.extend(list(temp_df.drop_duplicates('Book-Title')['Book-Title'].values))
-        item.extend(list(temp_df.drop_duplicates('Book-Title')['Book-Author'].values))
-        item.extend(list(temp_df.drop_duplicates('Book-Title')['Image-URL-L'].values))
-        item.extend(list(temp_df.drop_duplicates('Book-Title')['ISBN'].values))  # Make sure to add ISBN
-        
-        data.append(item)
+    data = filter_similar_books(user_input, 20)
 
     return render_template('recommend.html', data=data)
 
@@ -70,6 +81,7 @@ def query():
                 book["ISBN_x"], 
                 book['avg_rating'],
                 book['num_ratings'],
+                book['Summary'],
             ]
             data.append(item)
 
@@ -88,10 +100,13 @@ def book_detail(isbn):
     
     # Extract the first (and only) book's details
     book = book.iloc[0]
+    book_name = book['Book-Title']
     
-    
-    return render_template('book_detail.html', book=book)
+    similar_books = filter_similar_books(book_name, 20) # Find 20 similar books
+    return render_template('book_detail.html', book=book, similar_books=similar_books)
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # app.run(debug=True) # For sairaj
+    app.run(threaded=False, processes=1, debug=False)
+

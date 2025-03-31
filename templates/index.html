@@ -10,7 +10,7 @@
     </div>
     <div class="row g-4 justify-content-center">
         {% for i in range(book_name|length) %}
-            {{ macros.book_details(book_name[i], author[i], image[i], rating[i], votes[i]) }}
+            {{ macros.book_details(book_name[i], author[i], image[i], isbn[i], rating[i], votes[i]) }}
         {% endfor %}
     </div>
 </div>

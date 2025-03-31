@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% import "macros.html" as macros %}
 
 {% block content %}
 <div class="container">
@@ -12,15 +13,7 @@
        </div>
        {% if data %}
        {% for i in data %}
-       <div class="col-md-3" style="margin-top:25px";>
-           <div class="card">
-               <div class="card-body">
-                   <img class="card-img-top" src={{ i[2] }} width="25px">
-                   <h3>{{i[0]}}</h3>
-                   <h5>{{i[1]}}</h5>
-               </div>
-           </div>
-       </div>
+            {{ macros.book_details(i[0], i[1], i[2], i[3]) }}
        {% endfor %}
        {% endif %}
    </div>
