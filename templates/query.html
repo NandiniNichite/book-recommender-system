@@ -48,32 +48,27 @@
 <div class="container">
    <div class="row">
        <div class="col-12" >
-           <h1 class="text-black" style="margin:15px;" >Recommend Books</h1>
-           <form action="/recommend_books" method="post" >
-               <input name="user_input" class="form-control"><br>
+           <h1 class="text-black" style="margin:15px;" >Recommend Books Based On Query</h1>
+           <form action="/query_books" method="post" >
+               <input name="query" class="form-control"><br>
                <input type="submit" class="btn btn-lg btn-warning">
            </form>
-       </div>
-       {% if data %}
-       {% for i in data %}
-       <div class="col-md-3" style="margin-top:25px";>
-           <div class="card">
-               <div class="card-body">
-                   <img class="card-img-top"  src={{ i[2] }} width="25px">
-                   <h3>{{i[0]}}</h3>
-                   <h5>{{i[1]}}</h5>
-
-               </div>
-
-           </div>
-
-       </div>
-       {% endfor%}
-
-       {% endif %}
-
-
-
+        </div>
+        {% if data %}
+            <p> Query: {{ query }}</p>
+            {% for i in data %}
+            <div class="row" style="margin-top: 25px;">
+                <div class="col-md-3 d-flex align-items-center">
+                    <img class="img-fluid" src="{{ i[2] }}" style="max-width: 100%; height: auto;">
+                </div>
+                <div class="col-md-9">
+                    <h3>{{ i[0] }}</h3>  <!-- Book Title -->
+                    <h5>{{ i[1] }}</h5>  <!-- Book Author -->
+                    <p>{{ i[3] }}</p>    <!-- Book Summary -->
+                </div>
+            </div>
+            {% endfor %}
+        {% endif %}
    </div>
 </div>
 
