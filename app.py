@@ -2,9 +2,10 @@ import difflib
 from flask import Flask, redirect, render_template, request, abort
 import pickle
 import numpy as np
-# from find_books import query_books
+from find_books import query_books
 
-query_books = None # Uncomment this line when debugging and comment the import, for faster load
+# query_books = None # Uncomment this line when debugging and comment the import, for faster load
+
 # Loading necessary data
 popular_df = pickle.load(open('popular.pkl', 'rb'))
 pt = pickle.load(open('pt.pkl', 'rb'))
@@ -39,6 +40,10 @@ def functions_injector():
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/about')
+def about():
+    return render_template('about.html')
 
 @app.route('/popular')
 def popular():
@@ -129,6 +134,5 @@ def book_detail(isbn):
 
 
 if __name__ == '__main__':
-    app.run(debug=True) # For sairaj
-    # app.run(threaded=False, processes=1, debug=False)
-
+    # app.run(debug=True) # For sairaj
+    app.run(threaded=False, processes=1, debug=False)
