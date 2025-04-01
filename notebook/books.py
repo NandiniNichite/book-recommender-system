@@ -9,14 +9,7 @@ summaries_df = pd.read_csv('Summaries.csv')  # This contains summaries for 30k b
 
 # Check for the existence of each image URL column and select the best available one
 def get_image_url(row):
-    if pd.notna(row.get('Image-URL-M', None)):
-        return row['Image-URL-M']
-    elif pd.notna(row.get('Image-URL-L', None)):
-        return row['Image-URL-L']
-    elif pd.notna(row.get('Image-URL-S', None)):
-        return row['Image-URL-S']
-    else:
-        return None  # No image available
+    return row['Image-URL-L']
 
 # Apply this function to each row to create a new 'Image-URL' column
 books_df['Image-URL'] = books_df.apply(get_image_url, axis=1)
@@ -32,11 +25,6 @@ summaries_df['Summary'] = summaries_df['Summary'].astype('object')
 
 # Merge the datasets on 'ISBN', keeping all rows from books_df and adding summaries from summaries_df where available
 merged_df = pd.merge(books_df, summaries_df, on='ISBN', how='left')
-
-# Fill missing summaries with NaN (using numpy)
-merged_df['Summary'] = merged_df['Summary'].fillna(np.nan)
-
-# Now merged_df contains all books, with summaries where they exist, or NaN where they do not
 
 # Optionally, save the result to a pickle file or CSV for later use
 merged_df.to_pickle('books_with_summaries.pkl')  # Save to pickle for efficient storage
