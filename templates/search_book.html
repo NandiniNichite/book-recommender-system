@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h1 class="mt-4 text-center">Select a Book</h1>
+
+            {% if matches %}
+            <p class="text-center text-muted">We found multiple matches for your search. Please select the correct book.</p>
+
+            <div class="list-group shadow-sm">
+                {% for book in matches %}
+                <a href="{{ url_for('recommend', book_name=book) }}" class="list-group-item list-group-item-action d-flex align-items-center">
+                    <i class="bx bx-book fs-4 me-3"></i>
+                    <span class="fw-bold">{{ book }}</span>
+                    <i class="bx bx-chevron-right ms-auto fs-4"></i>
+                </a>
+                {% endfor %}
+            </div>
+
+            {% else %}
+            <p class="text-center text-danger mt-4">No matches found.</p>
+            <div class="text-center">
+                <a href="{{ url_for('recommend_ui') }}" class="btn btn-warning">Try Again</a>
+            </div>
+            {% endif %}
+
+            <div class="text-center mt-4">
+                <a href="{{ url_for('index') }}" class="btn btn-secondary">Back to Home</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,9 +1,10 @@
-from flask import Flask, render_template, request, abort
+import difflib
+from flask import Flask, redirect, render_template, request, abort
 import pickle
 import numpy as np
-from find_books import query_books
+# from find_books import query_books
 
-# query_books = None # Uncomment this line when debugging and comment the import, for faster load
+query_books = None # Uncomment this line when debugging and comment the import, for faster load
 # Loading necessary data
 popular_df = pickle.load(open('popular.pkl', 'rb'))
 pt = pickle.load(open('pt.pkl', 'rb'))
@@ -53,12 +54,28 @@ def index():
 def recommend_ui():
     return render_template('recommend.html')
 
-@app.route('/recommend_books', methods=['post'])
-def recommend():
-    user_input = request.form.get('user_input')
-    data = filter_similar_books(user_input, 20)
+@app.route('/search_book', methods=['POST'])
+def search_book():
+    user_input = request.form.get('user_input')  # Get user input from form
+    
+    if not user_input:
+        return redirect("/recommend")  # Handle empty input case
+    
+    # Extract book titles from DataFrame
+    book_titles = pt.axes[0].tolist()
 
-    return render_template('recommend.html', data=data)
+    # Find multiple close matches
+    matches = difflib.get_close_matches(user_input, book_titles, n=5, cutoff=0.5)
+
+    return render_template('search_book.html', matches=matches)
+
+@app.route('/recommend_books')
+def recommend():
+    book_name = request.args.get('book_name')
+
+    data = filter_similar_books(book_name, 20)
+
+    return render_template('recommend.html', book_name=book_name, data=data)
 
 @app.route('/query')
 def query_ui():
@@ -108,6 +125,6 @@ def book_detail(isbn):
 
 
 if __name__ == '__main__':
-    # app.run(debug=True) # For sairaj
-    app.run(threaded=False, processes=1, debug=False)
+    app.run(debug=True) # For sairaj
+    # app.run(threaded=False, processes=1, debug=False)
 

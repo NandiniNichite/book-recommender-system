@@ -3,19 +3,20 @@
 
 {% block content %}
 <div class="container">
-   <div class="row">
-       <div class="col-12" >
-           <h1 class="" style="margin:15px;" >Recommend Books</h1>
-           <form action="/recommend_books" method="post" >
-               <input name="user_input" class="form-control"><br>
-               <input type="submit" class="btn btn-lg btn-warning">
-           </form>
-       </div>
-       {% if data %}
-       {% for i in data %}
-            {{ macros.book_details(i[0], i[1], i[2], i[3]) }}
-       {% endfor %}
-       {% endif %}
-   </div>
+    <div class="row">
+        <div class="col-12 mb-2">
+            <h1 class="" style="margin:15px;">Recommend Books</h1>
+            <form action="/search_book" method="post">
+                <input name="user_input" class="form-control"><br>
+                <input type="submit" class="btn btn-lg btn-warning">
+            </form>
+        </div>
+        {% if data %}
+            <h3> Books Similar to: {{ book_name }}</h3>
+            {% for i in data %}
+                {{ macros.book_details(i[0], i[1], i[2], i[3]) }}
+            {% endfor %}
+        {% endif %}
+    </div>
 </div>
 {% endblock %}
