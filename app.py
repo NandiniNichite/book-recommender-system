@@ -3,6 +3,7 @@ import pickle
 import numpy as np
 from find_books import query_books
 
+# query_books = None # Uncomment this line when debugging and comment the import, for faster load
 # Loading necessary data
 popular_df = pickle.load(open('popular.pkl', 'rb'))
 pt = pickle.load(open('pt.pkl', 'rb'))

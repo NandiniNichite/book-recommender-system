@@ -2,8 +2,8 @@
 body {
     height: 100vh;
     background-color: var(--body-color);
-    transition: background-color 0.3s ease, color 0.3s ease;
 }
+
 
 body.dark {
     --body-color: #18191A;
@@ -12,49 +12,21 @@ body.dark {
     --text-color: #CCC;  /* Light color for text */
     --search-bar: #242526;
     --search-text: #FFFFFF; /* White color for search text in dark mode */
+    --bs-navbar-brand-color: var(--text-color)
     color: var(--text-color); /* Text color will be light in dark mode */
 }
 
-nav {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 70px;
-    width: 100%;
-    background-color: var(--nav-color);
-    z-index: 100;
-    transition: background-color 0.3s ease;
-}
+
 
 body.dark nav {
     border: 1px solid #393838;
 }
 
-nav .nav-bar {
-    position: relative;
-    height: 100%;
-    max-width: 1000px;
-    width: 100%;
-    background-color: var(--nav-color);
-    margin: 0 auto;
-    padding: 0 30px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-nav .nav-bar .logo a {
-    font-size: 25px;
-    font-weight: 500;
-    color: var(--text-color); /* Updated for dark mode */
-    text-decoration: none;
-}
 
 .nav-links li a {
     position: relative;
     font-size: 17px;
     font-weight: 400;
-    color: var(--text-color); /* Updated for dark mode */
     text-decoration: none;
     padding: 10px;
     transition: color 0.3s ease;
@@ -69,9 +41,7 @@ nav .nav-bar .logo a {
     height: 6px;
     width: 6px;
     border-radius: 50%;
-    background-color: var(--text-color); /* Updated for dark mode */
     opacity: 0;
-    transition: all 0.3s ease;
 }
 
 .nav-links li:hover a::before {
@@ -97,3 +67,16 @@ body.dark .search-field i {
     box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
     border-radius: 8px;
 }
+
+[data-bs-theme=dark] .navbar-brand,[data-bs-theme=dark] .nav-link  {
+    color: #CCC;
+
+}
+
+[data-bs-theme=dark] .article-content {
+    color: #9BA4B5;
+}
+
+[data-bs-theme=dark] .invertOnDark {
+    filter: invert(100%); 
+} 
