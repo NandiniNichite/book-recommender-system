@@ -38,11 +38,15 @@ def functions_injector():
 
 @app.route('/')
 def index():
+    return render_template('index.html')
+
+@app.route('/popular')
+def popular():
     # Sample 50 random books
     df_sampled = popular_df.sample(n=50)
     df_sampled["avg_rating"] = df_sampled["avg_rating"].round(2)
 
-    return render_template('index.html',
+    return render_template('popular.html',
                            book_name=list(df_sampled["Book-Title"].values),
                            author=list(df_sampled["Book-Author"].values),
                            image=list(df_sampled['Image-URL-L'].values),

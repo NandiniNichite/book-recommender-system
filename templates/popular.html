@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% import "macros.html" as macros %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-4">
+        <h1 class="fw-bold text-primary">Top 50 Books</h1>
+        <p class="text-muted">Discover the best books curated just for you.</p>
+    </div>
+    <div class="row g-4 justify-content-center">
+        {% for i in range(book_name|length) %}
+            {{ macros.book_details(book_name[i], author[i], image[i], isbn[i], rating[i], votes[i]) }}
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
