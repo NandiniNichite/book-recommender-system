@@ -96,7 +96,7 @@ def query():
     
     # Check if user_input exists (i.e., form has been submitted)
     if user_input:
-        books_df = query_books(user_input, 100)
+        books_df = query_books(user_input, 70)
         queries_result_df = books_df.sample(50)
 
         data = []
