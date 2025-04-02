@@ -1,19 +1,22 @@
 import difflib
-from flask import Flask, redirect, render_template, request, abort
-import pickle
+from flask import Flask, redirect, render_template, request, abort, json, session, app, jsonify
+import pickle, os
 import numpy as np
 from find_books import query_books
+import uuid
 
 # query_books = None # Uncomment this line when debugging and comment the import, for faster load
-
 # Loading necessary data
 popular_df = pickle.load(open('popular.pkl', 'rb'))
 pt = pickle.load(open('pt.pkl', 'rb'))
 books = pickle.load(open('books.pkl', 'rb'))
 similarity_scores = pickle.load(open('similarity_scores.pkl', 'rb'))
 merged_df = pickle.load(open('books_with_summaries.pkl', 'rb'))
+BOOKMARKS_FILE = 'bookmarks.json'
 
 app = Flask(__name__)
+
+app.secret_key = os.urandom(24)
 
 def filter_similar_books(book_name: str, count: int) -> list:
     try: 
@@ -117,6 +120,7 @@ def query():
         # No query, pass an empty list
         return render_template('query.html', data=[], query=user_input)
 
+
 @app.route('/book/<isbn>')
 def book_detail(isbn):
     # Find the book with the given ISBN
@@ -133,6 +137,39 @@ def book_detail(isbn):
     return render_template('book_detail.html', book=book, similar_books=similar_books)
 
 
+def get_book_details(isbn):
+    book = merged_df[merged_df['ISBN'] == isbn]
+    
+    if book.empty:
+        return None  
+    
+    book_info = {
+                'ISBN': book['ISBN'].values[0],
+                'Book-Title': book['Book-Title'].values[0],
+                'Book-Author': book['Book-Author'].values[0],
+                'Image-URL-L': book['Image-URL'].values[0],
+            }
+        
+    return book_info
+
+@app.route('/get_book_details_batch', methods=['POST'])
+def get_book_details_batch():
+    data = request.get_json()
+    isbns = data.get('isbns', [])
+    
+    book_details = []
+    for isbn in isbns:
+        book_info = get_book_details(isbn)  
+        if book_info:
+            book_details.append(book_info)
+    
+    return jsonify(book_details)
+
+@app.route('/bookmarks')
+def bookmarks():
+    return render_template('bookmarks.html')
+
+
 if __name__ == '__main__':
-    # app.run(debug=True) # For sairaj
-    app.run(threaded=False, processes=1, debug=False)
+   app.run(debug=True) # For sairaj
+#app.run(threaded=False, processes=1, debug=False) #thankyou for being considerate :)

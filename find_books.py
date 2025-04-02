@@ -18,8 +18,8 @@ def get_detailed_instruct(query: str) -> str:
     return f'Instruct: {task}\nQuery: {query}'
 
 # Load embeddings & indices from Pickle
-embeddings = torch.load(EMBEDDINGS_FILE, map_location=torch.device("cuda"))
-
+embeddings = torch.load(EMBEDDINGS_FILE, map_location=torch.device("cuda")) #for yash and when keep laptop asleep
+#embeddings = torch.load(EMBEDDINGS_FILE, map_location=torch.device("cpu"))
 with open(INDEX_FILE, "rb") as f:
     valid_indices = pickle.load(f)  # Row indices of stored embeddings
 
