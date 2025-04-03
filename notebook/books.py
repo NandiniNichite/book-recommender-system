@@ -18,7 +18,7 @@ books_df['Image-URL'] = books_df.apply(get_image_url, axis=1)
 books_df = books_df[['ISBN', 'Book-Title', 'Book-Author', 'Year-Of-Publication', 'Image-URL']]
 
 # Ensure that we only keep the relevant columns in the summaries dataset
-summaries_df = summaries_df[['ISBN', 'Summary']]  # Assuming 'Summary' is the column with summaries
+summaries_df = summaries_df[['ISBN', 'Summary','Google-Book-ID','Keywords']]  # Assuming 'Summary' is the column with summaries
 
 # Convert the Summary column to object type to ensure proper handling
 summaries_df['Summary'] = summaries_df['Summary'].astype('object')
@@ -27,5 +27,5 @@ summaries_df['Summary'] = summaries_df['Summary'].astype('object')
 merged_df = pd.merge(books_df, summaries_df, on='ISBN', how='left')
 
 # Optionally, save the result to a pickle file or CSV for later use
-merged_df.to_pickle('books_with_summaries.pkl')  # Save to pickle for efficient storage
-merged_df.to_csv('books_with_summaries.csv', index=False)  # Save to CSV for easy access
+merged_df.to_pickle('books_with_summaries-withGID.pkl')  # Save to pickle for efficient storage
+merged_df.to_csv('books_with_summaries-withGID.csv', index=False)  # Save to CSV for easy access

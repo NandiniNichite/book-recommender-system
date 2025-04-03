@@ -171,5 +171,5 @@ def bookmarks():
 
 
 if __name__ == '__main__':
-   app.run(debug=True) # For sairaj
-#app.run(threaded=False, processes=1, debug=False) #thankyou for being considerate :)
+   #app.run(debug=True) # For sairaj
+    app.run(threaded=False, processes=1, debug=False) #thankyou for being considerate :)
