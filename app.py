@@ -3,7 +3,7 @@ from flask import Flask, redirect, render_template, request, abort, json, sessio
 import pickle, os
 import numpy as np
 from find_books import query_books
-import uuid
+from collections import Counter
 
 # query_books = None # Uncomment this line when debugging and comment the import, for faster load
 # Loading necessary data
@@ -12,6 +12,7 @@ pt = pickle.load(open('pt.pkl', 'rb'))
 books = pickle.load(open('books.pkl', 'rb'))
 similarity_scores = pickle.load(open('similarity_scores.pkl', 'rb'))
 merged_df = pickle.load(open('books_with_summaries.pkl', 'rb'))
+books_df = pickle.load(open('bookandsummarieswithGID.pkl','rb'))
 BOOKMARKS_FILE = 'bookmarks.json'
 
 app = Flask(__name__)
@@ -61,6 +62,40 @@ def popular():
                            votes=list(df_sampled['num_ratings'].values),
                            rating=list(df_sampled['avg_rating'].values),
                            isbn=list(df_sampled['ISBN'].values))
+
+from collections import Counter
+
+@app.route('/categories')
+def categories():
+    all_keywords = books_df['Keywords'].dropna().str.lower().str.split(', ')
+    keyword_counts = Counter([kw.strip() for sublist in all_keywords for kw in sublist])
+
+    # Only keep keywords with more than 1000 books
+    popular_keywords = {k: v for k, v in keyword_counts.items() if v > 200}
+    sorted_keywords = sorted(popular_keywords.items(), key=lambda x: x[1], reverse=True)
+
+    return render_template('categories.html', keywords=sorted_keywords)
+
+
+@app.route('/categories/<path:keyword>')
+def books_by_category(keyword):
+    filtered_df = books_df[books_df['Keywords'].str.contains(fr'\b{keyword}\b', case=False, na=False)]
+    df_sampled = filtered_df.sample(n=min(50, len(filtered_df)))
+
+    context = {
+        "category": keyword.capitalize(),
+        "book_name": list(df_sampled["Book-Title"].values),
+        "author": list(df_sampled["Book-Author"].values),
+        "image": list(df_sampled['Image-URL'].values),
+        "isbn": list(df_sampled['ISBN'].values)
+    }
+
+    if "avg_rating" in df_sampled.columns and "num_ratings" in df_sampled.columns:
+        df_sampled["avg_rating"] = df_sampled["avg_rating"].round(2)
+        context["rating"] = list(df_sampled["avg_rating"].values)
+        context["votes"] = list(df_sampled["num_ratings"].values)
+
+    return render_template('category_books.html', **context)
 
 @app.route('/recommend')
 def recommend_ui():

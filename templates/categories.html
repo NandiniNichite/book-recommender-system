@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container py-5">
+    <h1 class="text-center fw-bold text-primary mb-5">Browse by Category</h1>
+    <p class="text-center text-muted fs-5 mb-5">Curated categories for you with books that you would love ❤️</p>
+    <div class="row g-4">
+        {% for keyword, count in keywords %}
+        <div class="col-12 col-md-4">
+            <a href="{{ url_for('books_by_category', keyword=keyword) }}" class="text-decoration-none">
+                <div class="card shadow-lg border-0 rounded-4 text-white text-center p-5" style="height: 200px; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); display: flex; align-items: center; justify-content: center;">
+                    <div>
+                        <h4 class="fw-bold mb-2">{{ keyword.title() }}</h4>
+                        <span class="px-3 py-1 rounded-pill" style="background-color: rgba(255, 255, 255, 0.15); color: #fff; font-weight: 500;">
+                            {{ count }} books
+                        </span>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
