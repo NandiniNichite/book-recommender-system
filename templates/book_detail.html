@@ -29,48 +29,82 @@
             <p><strong>ISBN:</strong> {{ book['ISBN'] }}</p>
             
             <h5 class="mt-4"><strong>Summary:</strong></h5>
-            <p>{{ book['Summary'] if book['Summary'] else 'No summary available.' }}</p>
+            <p id="summaryText">
+                <span id="summaryContent"></span>
+                <span class="text-primary" id="cursor"> •</span>
+            </p>
+            
+            <!-- Language Selector and Translate Button -->
+            <div class="mt-4" id="translatorDiv" style="display: none;">
+                <form id="translateForm" method="get" action="">
+                    <select name="lang" id="languageSelector" class="form-select" aria-label="Select language">
+                        <option value="en">English</option>
+                        <option value="zh-cn">Mandarin Chinese</option>
+                        <option value="hi">Hindi</option>
+                        <option value="es">Spanish</option>
+                        <option value="fr">French</option>
+                        <option value="ar">Arabic</option>
+                        <option value="bn">Bengali</option>
+                        <option value="ru">Russian</option>
+                        <option value="pt">Portuguese</option>
+                        <option value="ur">Urdu</option>
+                        <option value="ta">Tamil</option>
+                        <option value="te">Telugu</option>
+                        <option value="mr">Marathi</option>
+                        <option value="gu">Gujarati</option>
+                        <option value="ml">Malayalam</option>                    
+                    </select>
+                    <button type="submit" class="btn btn-primary mt-2">Translate</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-12 text-center mb-5">
+            <div class="d-flex justify-content-center flex-wrap gap-3">
+                <a href="/" class="btn btn-outline-primary btn-lg" title="Home">
+                    <i class="fas fa-home"></i>
+                </a>
+                {% if google_id %}
+                <a href="https://books.google.com/books?id={{ google_id }}" target="_blank" class="btn btn-outline-primary btn-lg" title="View on Google Books">
+                    <i class="fas fa-book-open"></i> Google Books
+                </a>
+                {% endif %}
+                {% if book['ISBN'] %}
+                <a href="https://www.goodreads.com/search?q={{ book['ISBN'] }}" target="_blank" class="btn btn-outline-success btn-lg" title="View on Goodreads">
+                    <i class="fab fa-goodreads"></i> Reviews
+                {% endif %}
+                <a href="/bookmarks" class="btn btn-outline-warning btn-lg" title="Bookmarks">
+                    <i class="fas fa-bookmark"></i>
+                </a>
+            </div>
+        </div>
+
+
+        <!-- Similar Books Section -->
+        <div class="row mt-4">
+            {% if similar_books %}
+                <h2 class="mt-2 mb-2">Similar Books To This:</h2>
+                {% for i in similar_books %}
+                    {{ macros.book_details(i[0], i[1], i[2], i[3], small=True) }}
+                {% endfor %}
+            {% endif %}
         </div>
     </div>
-
-<div class="col-12 text-center mb-5">
-    <div class="d-flex justify-content-center flex-wrap gap-3">
-        <a href="/" class="btn btn-outline-primary btn-lg" title="Home">
-            <i class="fas fa-home"></i>
-        </a>
-        {% if google_id %}
-        <a href="https://books.google.com/books?id={{ google_id }}" target="_blank" class="btn btn-outline-primary btn-lg" title="View on Google Books">
-            <i class="fas fa-book-open"></i> Google Books
-        </a>
-        {% endif %}
-        {% if book['ISBN'] %}
-        <a href="https://www.goodreads.com/search?q={{ book['ISBN'] }}" target="_blank" class="btn btn-outline-success btn-lg" title="View on Goodreads">
-            <i class="fab fa-goodreads"></i> Reviews
-        {% endif %}
-        <a href="/bookmarks" class="btn btn-outline-warning btn-lg" title="Bookmarks">
-            <i class="fas fa-bookmark"></i>
-        </a>
-    </div>
 </div>
-
-
-    <!-- Similar Books Section -->
-    <div class="row mt-4">
-        {% if similar_books %}
-            <h2 class="mt-2 mb-2">Similar Books To This:</h2>
-            {% for i in similar_books %}
-                {{ macros.book_details(i[0], i[1], i[2], i[3], small=True) }}
-            {% endfor %}
-        {% endif %}
-    </div>
-</div>
-
 <!-- Bookmark JavaScript -->
 <script>
     let bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
     const currentBookISBN = "{{ book['ISBN'] }}";
     let isBookmarked = bookmarks.includes(currentBookISBN);
     const bookmarkIcon = document.getElementById("bookmarkIcon");
+
+        // Summary Typer
+        const summaryText = `{{ book['Summary'] if book['Summary'] else 'No summary available.' }}`;
+        const words = summaryText.split(" ");
+        const contentEl = document.getElementById("summaryContent");
+        const cursorEl = document.getElementById("cursor");
+        const translatorDiv = document.getElementById("translatorDiv");
+        let i = 0;
 
     updateBookmarkIcon();
 
@@ -96,5 +130,41 @@
             bookmarkIcon.classList.remove("fa-solid");
         }
     }
+
+    function typeWordByWord() {
+            if (i < words.length) {
+                const wordSpan = document.createElement("span");
+                wordSpan.className = "fade-word";
+                wordSpan.textContent = words[i] + " ";
+                contentEl.appendChild(wordSpan);
+
+                setTimeout(() => {
+                    wordSpan.classList.add("visible");
+                }, 50);
+
+                i++;
+                const randomDelay = Math.floor(Math.random() * 100);
+                setTimeout(typeWordByWord, randomDelay);
+            } else {
+                // Clear all child elements and insert plain text after animation is done
+                setTimeout(() => {
+                    contentEl.innerHTML = summaryText + " ";
+                    cursorEl.style.display = "none";
+                    translatorDiv.style.display = "block";
+                }, 400); // wait just a moment so the last word shows before reset
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", typeWordByWord);
 </script>
+
+<style>
+    .fade-word {
+        opacity: 0;
+        transition: opacity 0.3s ease-in;
+    }
+    .fade-word.visible {
+        opacity: 1;
+    }
+</style>
 {% endblock %}

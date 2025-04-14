@@ -1,7 +1,9 @@
+import asyncio
 import difflib
-from flask import Flask, redirect, render_template, request, abort, json, session, app, jsonify
+from flask import Flask, redirect, render_template, request, abort, app, jsonify
 import pickle, os
 import numpy as np
+from googletrans import Translator
 from find_books import query_books
 from collections import Counter
 from id_books import get_google_books_ids
@@ -160,15 +162,27 @@ def query():
 
 @app.route('/book/<isbn>')
 def book_detail(isbn):
-    # Find the book with the given ISBN
+    def sync_translator(text, dest):
+        async def asyncfunc():
+            async with Translator() as translator:
+                result = await translator.translate(text, dest=dest)
+            return result.text
+        return asyncio.run(asyncfunc())
+
+    # Find the book
     book = merged_df[merged_df['ISBN'] == isbn]
-    
+
     if book.empty:
-        abort(404)  # Return 404 error if book is not found
-    
-    # Extract the first (and only) book's details
+        abort(404)
+
     book = book.iloc[0]
     book_name = book['Book-Title']
+
+    if book['Summary'] == "-1":
+        book['Summary'] = None
+
+    # Handle translation
+    lang = request.args.get('lang')
 
     google_book_id = None
     if 'GoogleBooksID' not in books_df.columns:
@@ -177,10 +191,20 @@ def book_detail(isbn):
     match = books_df[books_df['ISBN'] == isbn]
     if not match.empty:
         google_book_id = match.iloc[0]['GoogleBooksID']
-    
-    similar_books = filter_similar_books(book_name, 20) # Find 20 similar books
-    return render_template('book_detail.html', book=book, similar_books=similar_books,google_id=google_book_id)
 
+    if book['Summary'] and lang:
+        try:
+            book['Summary'] = sync_translator(book['Summary'], lang)
+        except Exception as e:
+            print("Translation failed:", e)
+
+    similar_books = filter_similar_books(book_name, 20)
+    return render_template(
+        'book_detail.html',
+        book=book,
+        similar_books=similar_books,
+        google_id=google_book_id
+    )
 
 def get_book_details(isbn):
     book = merged_df[merged_df['ISBN'] == isbn]
@@ -216,5 +240,5 @@ def bookmarks():
 
 
 if __name__ == '__main__':
-   #app.run(debug=True) # For sairaj
+    # app.run(debug=True) # For sairaj
     app.run(threaded=False, processes=1, debug=False) #thankyou for being considerate :)
