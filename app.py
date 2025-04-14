@@ -4,7 +4,7 @@ import pickle, os
 import numpy as np
 from find_books import query_books
 from collections import Counter
-
+from id_books import get_google_books_ids
 # query_books = None # Uncomment this line when debugging and comment the import, for faster load
 # Loading necessary data
 popular_df = pickle.load(open('popular.pkl', 'rb'))
@@ -12,7 +12,9 @@ pt = pickle.load(open('pt.pkl', 'rb'))
 books = pickle.load(open('books.pkl', 'rb'))
 similarity_scores = pickle.load(open('similarity_scores.pkl', 'rb'))
 merged_df = pickle.load(open('books_with_summaries.pkl', 'rb'))
-books_df = pickle.load(open('bookandsummarieswithGID.pkl','rb'))
+books_df = pickle.load(open('bookandsummarieswithGID.pkl', 'rb'))
+books_df['GoogleBooksID'] = get_google_books_ids()
+
 BOOKMARKS_FILE = 'bookmarks.json'
 
 app = Flask(__name__)
@@ -167,9 +169,17 @@ def book_detail(isbn):
     # Extract the first (and only) book's details
     book = book.iloc[0]
     book_name = book['Book-Title']
+
+    google_book_id = None
+    if 'GoogleBooksID' not in books_df.columns:
+        books_df['GoogleBooksID'] = get_google_books_ids()
+
+    match = books_df[books_df['ISBN'] == isbn]
+    if not match.empty:
+        google_book_id = match.iloc[0]['GoogleBooksID']
     
     similar_books = filter_similar_books(book_name, 20) # Find 20 similar books
-    return render_template('book_detail.html', book=book, similar_books=similar_books)
+    return render_template('book_detail.html', book=book, similar_books=similar_books,google_id=google_book_id)
 
 
 def get_book_details(isbn):

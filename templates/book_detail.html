@@ -22,7 +22,7 @@
         <div class="col-md-8">
             <div class="d-flex justify-content-between align-items-center">
                 <h4><strong>Year of Publication:</strong> {{ book['Year-Of-Publication'] }}</h4>
-                <button id="bookmarkBtn" class="btn btn-link p-0" style="font-size: 2rem; color: #007bff;">
+                <button id="bookmarkBtn" class="btn btn-link p-0" style="font-size: 2rem; color: #007bff;" title="Bookmark">
                     <i class="fas fa-bookmark" id="bookmarkIcon"></i>
                 </button>
             </div>
@@ -33,70 +33,68 @@
         </div>
     </div>
 
-    <div class="col-12 text-center">
-        <a href="/" class="btn btn-primary btn-lg me-3">
-            <i class="fas fa-home"></i> Home
+<div class="col-12 text-center mb-5">
+    <div class="d-flex justify-content-center flex-wrap gap-3">
+        <a href="/" class="btn btn-outline-primary btn-lg" title="Home">
+            <i class="fas fa-home"></i>
         </a>
-        
-        <a href="/bookmarks" class="btn btn-warning btn-lg">
-            Bookmarks
+        {% if google_id %}
+        <a href="https://books.google.com/books?id={{ google_id }}" target="_blank" class="btn btn-outline-primary btn-lg" title="View on Google Books">
+            <i class="fas fa-book-open"></i> Google Books
+        </a>
+        {% endif %}
+        {% if book['ISBN'] %}
+        <a href="https://www.goodreads.com/search?q={{ book['ISBN'] }}" target="_blank" class="btn btn-outline-success btn-lg" title="View on Goodreads">
+            <i class="fab fa-goodreads"></i> Reviews
+        {% endif %}
+        <a href="/bookmarks" class="btn btn-outline-warning btn-lg" title="Bookmarks">
+            <i class="fas fa-bookmark"></i>
         </a>
     </div>
+</div>
 
+
+    <!-- Similar Books Section -->
     <div class="row mt-4">
         {% if similar_books %}
-            <h2 class="mt-2 mb-2">Similar Books To This: </h2>
+            <h2 class="mt-2 mb-2">Similar Books To This:</h2>
             {% for i in similar_books %}
                 {{ macros.book_details(i[0], i[1], i[2], i[3], small=True) }}
             {% endfor %}
         {% endif %}
-
-    <script>
-        // Get the list of bookmarked books from localStorage (if any)
-        let bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
-    
-        // Book ISBN to be used for toggling bookmark state
-        const currentBookISBN = "{{ book['ISBN'] }}";
-    
-        // Check if the book is bookmarked based on the localStorage data
-        let isBookmarked = bookmarks.includes(currentBookISBN);
-    
-        // Bookmark icon element
-        const bookmarkIcon = document.getElementById("bookmarkIcon");
-    
-        // Toggle bookmark icon based on initial state
-        updateBookmarkIcon();
-    
-        // Handle bookmark click event
-        document.getElementById("bookmarkBtn").addEventListener("click", function() {
-            if (isBookmarked) {
-                // Remove from bookmarks if already bookmarked
-                bookmarks = bookmarks.filter(isbn => isbn !== currentBookISBN);
-                alert("Book removed from bookmarks");
-            } else {
-                // Add to bookmarks if not bookmarked
-                bookmarks.push(currentBookISBN);
-                alert("Bookmarked successfully!");
-            }
-    
-            // Update localStorage with the new list of bookmarks
-            localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
-    
-            // Toggle the bookmark icon
-            isBookmarked = !isBookmarked;
-            updateBookmarkIcon();
-        });
-    
-        // Function to update the bookmark icon class based on the bookmark state
-        function updateBookmarkIcon() {
-            if (isBookmarked) {
-                bookmarkIcon.classList.add("fa-solid");
-                bookmarkIcon.classList.remove("fa-regular");
-            } else {
-                bookmarkIcon.classList.add("fa-regular");
-                bookmarkIcon.classList.remove("fa-solid");
-            }
-        }
-    </script>
+    </div>
 </div>
+
+<!-- Bookmark JavaScript -->
+<script>
+    let bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
+    const currentBookISBN = "{{ book['ISBN'] }}";
+    let isBookmarked = bookmarks.includes(currentBookISBN);
+    const bookmarkIcon = document.getElementById("bookmarkIcon");
+
+    updateBookmarkIcon();
+
+    document.getElementById("bookmarkBtn").addEventListener("click", function() {
+        if (isBookmarked) {
+            bookmarks = bookmarks.filter(isbn => isbn !== currentBookISBN);
+            alert("Book removed from bookmarks");
+        } else {
+            bookmarks.push(currentBookISBN);
+            alert("Bookmarked successfully!");
+        }
+        localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+        isBookmarked = !isBookmarked;
+        updateBookmarkIcon();
+    });
+
+    function updateBookmarkIcon() {
+        if (isBookmarked) {
+            bookmarkIcon.classList.add("fa-solid");
+            bookmarkIcon.classList.remove("fa-regular");
+        } else {
+            bookmarkIcon.classList.add("fa-regular");
+            bookmarkIcon.classList.remove("fa-solid");
+        }
+    }
+</script>
 {% endblock %}
